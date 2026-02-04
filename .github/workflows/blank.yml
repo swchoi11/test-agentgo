@@ -1,0 +1,63 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: "agentgo-studio"            # GCP 프로젝트 ID
+  REGION: "asia-northeast3"               # 서울 리전 (허용된 리전으로!)
+  REPO_NAME: "test"               # 아까 만든 Artifact Registry 이름
+  IMAGE_NAME: "agentgo-app"               # 이미지 이름 (원하는 대로)
+  SERVICE_NAME: "test-service-from-github"         # Cloud Run 서비스 이름
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # 1. GitHub에서 코드 가져오기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. GCP 인증 (워크로드 아이덴티티 사용)
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: "projects/700065559284/locations/global/workloadIdentityPools/test-github-provider/subject/SUBJECT_ATTRIBUTE_VALUE"
+          service_account: "github-deployer@agentgo-studio.iam.gserviceaccount.com"
+
+      # 3. gcloud CLI 설정
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      # 4. Docker가 Artifact Registry에 접근하도록 인증
+      - name: Docker Auth
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      # 5. Docker 이미지 빌드 및 푸시 (여기가 핵심!)
+      - name: Build and Push Container
+        run: |
+          # 이미지 전체 주소 생성
+          IMAGE_TAG=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          
+          # 빌드
+          docker build -t $IMAGE_TAG .
+          
+          # 푸시
+          docker push $IMAGE_TAG
+
+      # 6. Cloud Run 배포 (이미지 푸시 직후 바로 배포)
+      - name: Deploy to Cloud Run
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          # 방금 빌드한 그 이미지 태그(github.sha)를 정확히 배포
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          flags: '--allow-unauthenticated' 
