@@ -28,7 +28,7 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: "projects/700065559284/locations/global/workloadIdentityPools/test-github-provider/providers/test-github-provider"
+          workload_identity_provider: "projects/700065559284/locations/global/workloadIdentityPools/test-github-provider/providers/test-github-deployer"
           service_account: "test-github-deployer@agentgo-studio.iam.gserviceaccount.com"
 
       # 3. gcloud CLI 설정
