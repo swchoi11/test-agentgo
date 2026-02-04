@@ -47,7 +47,7 @@ jobs:
           IMAGE_TAG=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           
           # 빌드
-          docker build -t $IMAGE_TAG .
+          docker build -t $IMAGE_TAG -f app/Dockerfile ./app
           
           # 푸시
           docker push $IMAGE_TAG
