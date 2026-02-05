@@ -1,0 +1,43 @@
+steps:
+  # -----------------------------------------------------------------------------
+  # 1. Docker 이미지 빌드
+  #    - $_REGION, $_REPO_NAME 등의 변수는 트리거 설정에서 주입받습니다.
+  # -----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker build -t $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA \
+                     -t $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest .
+
+  # -----------------------------------------------------------------------------
+  # 2. 이미지를 Artifact Registry로 푸시 (Push)
+  # -----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME', 
+      '--all-tags'
+    ]
+
+  # -----------------------------------------------------------------------------
+  # 3. Cloud Run으로 배포 (Deploy)
+  #    - 방금 만든 이미지를 사용하여 서비스를 업데이트합니다.
+  # -----------------------------------------------------------------------------
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '$_SERVICE_NAME'                  # 서비스 이름
+      - '--image'
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA'
+      - '--region'
+      - '$_REGION'
+      - '--allow-unauthenticated'         # 외부 접속 허용
+
+# 빌드 과정에서 생성된 이미지 정보 기록
+images:
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest'
