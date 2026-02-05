@@ -4,6 +4,7 @@ steps:
   #    - $_REGION, $_REPO_NAME 등의 변수는 트리거 설정에서 주입받습니다.
   # -----------------------------------------------------------------------------
   - name: 'gcr.io/cloud-builders/docker'
+    dir: 'app'
     entrypoint: 'bash'
     args:
       - '-c'
