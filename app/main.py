@@ -19,7 +19,7 @@ async def simple_request(user_name: str, number: int):
     # vm으로 보낼 데이터
     message_data = {
         "user_name" : user_name,
-        "user_input": number
+        "number": number
     }
 
     data_bytes = json.dumps(message_data).encode("utf-8")

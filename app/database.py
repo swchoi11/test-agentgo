@@ -6,9 +6,8 @@ from sqlalchemy.ext.declarative import declarative_base
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 db_name = os.getenv("DB_NAME")
-instance_connection_name = os.getenv("INSTANCE_CONNECTION_NAME")
-
-db_url = f"postgresql+pg8000://{db_user}:{db_password}@/{db_name}?unix_sock=/cloudsql/{instance_connection_name}/.s.PGSQL.5432"
+db_host = os.getenv("DB_HOST")
+db_url = f"postgresql+pg8000://{db_user}:{db_password}@{db_host}:5432/{db_name}"
 
 engine = create_engine(db_url, pool_size=5, max_overflow=10)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
