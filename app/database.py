@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Datetime
+from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -16,7 +16,7 @@ Base = declarative_base()
 
 class Test(Base):
     __tablename__ = "test"
-    id = Column(Intger, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String)
     user_input = Column(Integer)
     vm_output = Column(String)
