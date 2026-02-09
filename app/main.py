@@ -2,12 +2,9 @@ import os
 from fastapi import FastAPI
 from database import add_record
 from database import Base, engine
-from dotenv import load_dotenv
 from google.cloud import pubsub_v1
 import json
 
-
-load_dotenv()
 
 app = FastAPI()
 
