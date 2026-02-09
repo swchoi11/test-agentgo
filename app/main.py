@@ -33,6 +33,6 @@ async def simple_request(user_name: str, user_input: int, db: Session=Depends(ge
     print(message_id)
 
     # cloud sql에 저장
-    add_record(user_name=user_name, user_input=user_input)
+    add_record(user_name=user_name, user_input=user_input, db=db)
     
 
