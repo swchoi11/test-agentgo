@@ -34,7 +34,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 
-class Test():
+class Test(Base):
     __tablename__ = "test"
     id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String)
