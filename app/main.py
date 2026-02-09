@@ -1,12 +1,14 @@
 import os
-from fastapi import FastAPI
-from database import add_record
-from database import Base, engine
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from database import get_db, add_record
 from google.cloud import pubsub_v1
 import json
 
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 project_id = os.getenv("PROJECT_ID")
 topic_id = os.getenv("TOPIC_ID")
@@ -15,7 +17,7 @@ publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(project_id, topic_id)
 
 @app.post("/user")
-async def simple_request(user_name: str, number: int):
+async def simple_request(user_name: str, number: int, db: Session=Depends(get_db)):
     # vm으로 보낼 데이터
     message_data = {
         "user_name" : user_name,
@@ -33,6 +35,6 @@ async def simple_request(user_name: str, number: int):
     print(message_id)
 
     # cloud sql에 저장
-    Base.metadata.create_all(bind=engine)
-    new_record = add_record(user_name=user_name, user_input=number)
-    return {"new_record": new_record}
+    add_record(user_name=user_name, number=number)
+    
+
