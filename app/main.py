@@ -15,11 +15,11 @@ publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(project_id, topic_id)
 
 @app.post("/user")
-async def simple_request(user_name: str, number: int, db: Session=Depends(get_db)):
+async def simple_request(user_name: str, user_input: int, db: Session=Depends(get_db)):
     # vm으로 보낼 데이터
     message_data = {
         "user_name" : user_name,
-        "number": number
+        "user_input": user_input
     }
 
     data_bytes = json.dumps(message_data).encode("utf-8")
@@ -33,6 +33,6 @@ async def simple_request(user_name: str, number: int, db: Session=Depends(get_db
     print(message_id)
 
     # cloud sql에 저장
-    add_record(user_name=user_name, number=number)
+    add_record(user_name=user_name, user_input=user_input)
     
 
