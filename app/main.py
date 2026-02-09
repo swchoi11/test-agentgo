@@ -8,8 +8,6 @@ import json
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
-
 project_id = os.getenv("PROJECT_ID")
 topic_id = os.getenv("TOPIC_ID")
 
