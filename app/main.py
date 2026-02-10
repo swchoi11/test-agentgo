@@ -31,6 +31,7 @@ async def simple_request(user_name: str, user_input: int, db: Session=Depends(ge
     
     # Pub/Sub 메시지 게시
     message_data = {
+        "db_id": new_record.id,
         "user_name" : user_name,
         "user_input": user_input
     }
