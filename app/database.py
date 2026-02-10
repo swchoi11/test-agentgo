@@ -48,10 +48,10 @@ def get_db():
     finally:
         db.close()
 
-def add_record(user_name: str, user_input: int, db: Session):
+def add_record(user_name: str, user_input: int, vm_output: str, db: Session):
 
     try:
-        new_record = Test(user_name=user_name, user_input=user_input)
+        new_record = Test(user_name=user_name, user_input=user_input, vm_output=vm_output)
         db.add(new_record)
         db.commit()
         db.refresh(new_record)
