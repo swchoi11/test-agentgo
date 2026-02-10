@@ -10,13 +10,13 @@ app = FastAPI()
 
 project_id = os.getenv("PROJECT_ID")
 INPUT_TOPIC_ID = os.getenv("INPUT_TOPIC_ID")
-OUTPUT_TOPIC_ID = os.getenv("OUTPUT_TOPIC_ID")
+OUTPUT_SUBS_ID = os.getenv("OUTPUT_SUBS_ID")
 
 publisher = pubsub_v1.PublisherClient()
 subscriber = pubsub_v1.SubscriberClient()
 
 pubs_path = publisher.topic_path(project_id, INPUT_TOPIC_ID)
-subs_path = subscriber.subscription_path(project_id, OUTPUT_TOPIC_ID)
+subs_path = subscriber.subscription_path(project_id, OUTPUT_SUBS_ID)
 
 
 @app.post("/user")
