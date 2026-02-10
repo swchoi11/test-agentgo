@@ -21,39 +21,43 @@ subs_path = subscriber.subscription_path(project_id, OUTPUT_TOPIC_ID)
 
 @app.post("/user")
 async def simple_request(user_name: str, user_input: int, db: Session=Depends(get_db)):
-    # vm으로 보낼 데이터
+    # 1. Pub/Sub 메시지 게시
     message_data = {
         "user_name" : user_name,
         "user_input": user_input
     }
-
     data_bytes = json.dumps(message_data).encode("utf-8")
     future = publisher.publish(pubs_path, data=data_bytes)
     message_id = future.result()
 
-    print(message_id)
-
-    # 토픽에서 메시지 가져오기
+    # 2. 결과 구독 (Pull 방식)
+    # 💡 주의: VM이 처리하는 속도보다 Pull이 빠르면 결과가 없을 수 있습니다.
     response = subscriber.pull(
-        request={"subscription": subs_path, "max_messages":1},
+        request={"subscription": subs_path, "max_messages": 1},
         timeout=5.0
     )
 
-    vm_output=None
-    for msg in response.recieved_messages:
-        vm_output = json.loads(msg.message.data.decode("utf-8"))
+    vm_output_raw = None
+    for msg in response.received_messages: # 오타 수정 완료
+        vm_output_raw = json.loads(msg.message.data.decode("utf-8"))
         subscriber.acknowledge(
             request={"subscription": subs_path, "ack_ids": [msg.ack_id]}
         )
 
-    return {"vm_output": vm_output}
+    # 3. Cloud SQL에 저장
+    # vm_output_raw가 dict라면 문자열로 변환하여 저장 (DB 컬럼이 String인 경우)
+    vm_output_str = json.dumps(vm_output_raw) if vm_output_raw else None
+    
+    add_record(
+        user_name=user_name, 
+        user_input=user_input, 
+        vm_output=vm_output_str, # 쉼표 추가 및 변수명 정리
+        db=db
+    )
+    
+    return {"vm_output": vm_output_raw}
 
 
 
-
-
-
-    # cloud sql에 저장
-    add_record(user_name=user_name, user_input=user_input, db=db)
     
 
